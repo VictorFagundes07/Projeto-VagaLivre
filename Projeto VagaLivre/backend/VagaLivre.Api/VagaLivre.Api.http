@@ -1,0 +1,6 @@
+@VagaLivre.Api_HostAddress = http://localhost:5108
+
+GET {{VagaLivre.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

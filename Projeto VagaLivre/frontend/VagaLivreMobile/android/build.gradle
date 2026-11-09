@@ -1,0 +1,33 @@
+buildscript {
+    ext {
+        buildToolsVersion = "37.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 37
+        targetSdkVersion = 36
+        ndkVersion = "27.1.12297006"
+        kotlinVersion = "2.2.10"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
+
+// Mantém os arquivos nativos das bibliotecas em caminhos curtos no Windows.
+subprojects { module ->
+    module.plugins.withId("com.android.library") {
+        def androidExtension = module.extensions.getByName("android")
+        def rootKey = Integer.toHexString(rootProject.projectDir.absolutePath.hashCode())
+        def moduleKey = Integer.toHexString(module.path.hashCode())
+        androidExtension.externalNativeBuild.cmake.buildStagingDirectory =
+            new File(System.getProperty("java.io.tmpdir"), "vagalivre-cxx/${rootKey}/${moduleKey}")
+        androidExtension.defaultConfig.externalNativeBuild.cmake.arguments.add("-DCMAKE_OBJECT_PATH_MAX=240")
+    }
+}
