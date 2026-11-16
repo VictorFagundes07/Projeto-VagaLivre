@@ -24,15 +24,13 @@ test('conta e garagem: cadastro, edição, login e desativação', async ({
       page.getByRole('textbox', { name: 'Endereço da API' }),
     ).toHaveValue('http://localhost:5108/api');
     await page.getByRole('button', { name: 'Fechar conexão' }).click();
-    await expect(
-      page.getByText('Bem-vindo ao seu próximo lugar.'),
-    ).toBeVisible();
+    await expect(page.getByText('Entre na sua conta')).toBeVisible();
     await page.screenshot({ path: 'test-results/entrada.png', fullPage: true });
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
     await expect(
       page.getByText('Preencha todos os campos para continuar.'),
     ).toBeVisible();
-    await page.getByRole('button', { name: 'Quero criar uma conta' }).click();
+    await page.getByRole('button', { name: 'Criar conta' }).click();
     await page
       .getByRole('textbox', { name: 'Nome completo' })
       .fill('Teste Interface');
@@ -92,7 +90,10 @@ test('conta e garagem: cadastro, edição, login e desativação', async ({
       .fill('Garagem teste editada');
     await page.getByRole('button', { name: 'Salvar alterações' }).click();
     await page
-      .getByRole('tab', { name: 'Minhas garagens', exact: true })
+      .getByRole('button', { name: 'Abrir opções', exact: true })
+      .click();
+    await page
+      .getByRole('button', { name: 'MINHAS GARAGENS', exact: true })
       .click();
     await expect(
       page.getByRole('button', {
@@ -104,7 +105,10 @@ test('conta e garagem: cadastro, edição, login e desativação', async ({
       path: 'test-results/garagens.png',
       fullPage: true,
     });
-    await page.getByRole('tab', { name: 'Meu perfil', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Abrir opções', exact: true })
+      .click();
+    await page.getByRole('button', { name: 'PERFIL', exact: true }).click();
     await page
       .getByRole('textbox', { name: 'Nome completo' })
       .fill('Teste Atualizado');
@@ -118,7 +122,10 @@ test('conta e garagem: cadastro, edição, login e desativação', async ({
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
     await expect(page.getByText('Olá, Teste.')).toBeVisible();
     await page
-      .getByRole('tab', { name: 'Minhas garagens', exact: true })
+      .getByRole('button', { name: 'Abrir opções', exact: true })
+      .click();
+    await page
+      .getByRole('button', { name: 'MINHAS GARAGENS', exact: true })
       .click();
     await page
       .getByRole('button', { name: 'Ver Garagem teste editada', exact: true })
@@ -130,10 +137,16 @@ test('conta e garagem: cadastro, edição, login e desativação', async ({
       .getByRole('button', { name: 'Confirmar desativação', exact: true })
       .click();
     await page
-      .getByRole('tab', { name: 'Minhas garagens', exact: true })
+      .getByRole('button', { name: 'Abrir opções', exact: true })
+      .click();
+    await page
+      .getByRole('button', { name: 'MINHAS GARAGENS', exact: true })
       .click();
     await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
-    await page.getByRole('tab', { name: 'Meu perfil', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Abrir opções', exact: true })
+      .click();
+    await page.getByRole('button', { name: 'PERFIL', exact: true }).click();
     await page
       .getByRole('button', { name: 'Desativar minha conta', exact: true })
       .click();
@@ -143,9 +156,7 @@ test('conta e garagem: cadastro, edição, login e desativação', async ({
         exact: true,
       })
       .click();
-    await expect(
-      page.getByText('Bem-vindo ao seu próximo lugar.'),
-    ).toBeVisible();
+    await expect(page.getByText('Entre na sua conta')).toBeVisible();
     expect(errors).toEqual([]);
   } finally {
     if (token) {

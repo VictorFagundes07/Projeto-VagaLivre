@@ -82,8 +82,8 @@ android {
         applicationId "com.vagalivremobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 4
+        versionName "1.0.3"
         externalNativeBuild {
             cmake {
                 arguments "-DCMAKE_OBJECT_PATH_MAX=240"
@@ -122,11 +122,10 @@ android {
             debuggable false
             signingConfig signingConfigs.debug
             applicationIdSuffix ".teste"
-            versionNameSuffix "-teste"
             matchingFallbacks = ['release']
             // Permite testar a API HTTP na rede local apenas nesta variante.
             manifestPlaceholders = [usesCleartextTraffic: "true"]
-            resValue "string", "app_name", "VagaLivre Teste"
+            resValue "string", "app_name", "VagaLivre"
         }
     }
 }

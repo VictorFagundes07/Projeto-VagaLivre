@@ -38,7 +38,7 @@ Para iOS, use macOS com Xcode e instale os pods antes de executar `npm run ios`.
 - Consulta de garagens ativas e busca local por título ou endereço.
 - Cadastro, detalhes, edição e desativação das próprias garagens com confirmação.
 - Campos de latitude/longitude e porte de veículo conforme o contrato da API.
-- Logo local e paleta azul claro, azul escuro e branco.
+- Interface minimalista com fundo branco, marca discreta e botões azuis; ícone Android com a logo do projeto.
 - Estados de carregamento, lista vazia, validação e mensagens de falha de conexão.
 
 O endereço da API é salvo no dispositivo e restaurado ao abrir o aplicativo. A sessão permanece em memória: recarregar a página ou fechar o aplicativo exige novo login. Mapa, fotos, preços, disponibilidade, reservas e pagamentos ainda dependem dos próximos módulos do backend.
@@ -60,11 +60,15 @@ Com Java e Android SDK configurados, execute dentro de `frontend/VagaLivreMobile
 npm.cmd run apk:teste
 ```
 
-O arquivo será gerado em `android/app/build/outputs/apk/homologacao/app-homologacao.apk`. Transfira e instale no celular. Esta variante inclui o JavaScript e os recursos, dispensa Metro/USB e aparece como **VagaLivre Teste**. Usa certificado de desenvolvimento para distribuição interna; a publicação em loja exige assinatura própria.
+O arquivo será gerado em `android/app/build/outputs/apk/homologacao/app-homologacao.apk`. Transfira e instale no celular. Esta variante inclui o JavaScript e os recursos, dispensa Metro/USB e aparece como **VagaLivre**. Usa certificado de desenvolvimento para distribuição interna; a publicação em loja exige assinatura própria.
 
 A primeira compilação foi concluída e uma cópia foi disponibilizada em `frontend/apk/VagaLivre-teste.apk`. Novas compilações atualizam o arquivo em `android/app/build/outputs/apk/homologacao/`; a cópia em `frontend/apk/` precisa ser atualizada manualmente. A assinatura foi verificada com `apksigner`. A execução em aparelho físico ainda precisa ser validada.
 
 A versão **1.0.1-teste** está em `frontend/apk/VagaLivre-teste-1.0.1.apk` e inclui a logo como ícone Android. Usa o mesmo identificador e certificado da versão anterior, com `versionCode` incrementado, permitindo instalar como atualização. Os ícones tradicionais são gerados por `scripts/generate-android-icons.ps1` a partir de `src/assets/logo.jpg`; os ícones adaptativos estão em `android/app/src/main/res/mipmap-anydpi-v26/`.
+
+A versão **1.0.2** usa o nome **VagaLivre**, sem o sufixo "Teste", e inclui a interface minimalista. A cópia para instalação fica em `frontend/apk/VagaLivre-1.0.2.apk`. O `versionCode` é 3; o identificador interno e o certificado foram mantidos para permitir atualizar a instalação anterior sem desinstalar o aplicativo.
+
+A versão **1.0.3** (`versionCode` 4) inclui a logo opção 2 com fundo transparente no login e à direita do cabeçalho da home. O botão de três barras à esquerda abre o menu lateral, nesta ordem: Perfil, Minhas garagens, Garagens favoritas e Configurações. Os corações nos anúncios permitem salvar e remover favoritos; eles são armazenados por conta neste dispositivo, sem sincronização entre aparelhos. Configurações permite alterar o endereço do servidor. O instalador fica em `frontend/apk/VagaLivre-1.0.3.apk`.
 
 Na tela inicial, abra **Conexão com o servidor** e salve a URL terminando em `/api`. Para uma API hospedada, use seu endereço HTTPS. Para a API no computador, inicie-a na raiz do repositório:
 

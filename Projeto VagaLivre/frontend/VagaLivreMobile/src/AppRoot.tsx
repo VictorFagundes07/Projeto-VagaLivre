@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
@@ -26,6 +26,7 @@ import {
 } from './api';
 import { Brand, Button, colors, Field, Notice, styles as s } from './ui';
 import { restoreServer, saveServer } from './serverConfig';
+import HomeScreen from './HomeScreen';
 
 type Routes = {
   Home: undefined;
@@ -58,7 +59,7 @@ function Connection() {
   return (
     <View style={{ gap: 12 }}>
       <Button
-        secondary
+        quiet
         title={open ? 'Fechar conexão' : 'Conexão com o servidor'}
         onPress={() => setOpen(!open)}
       />
@@ -148,25 +149,19 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
   }
   return (
     <Page>
-      <View
-        style={{ maxWidth: 460, width: '100%', alignSelf: 'center', gap: 24 }}
-      >
-        <Brand large />
-        <View style={{ gap: 8 }}>
-          <Text style={s.badge}>MAIS ESPAÇO PARA SUA ROTINA</Text>
+      <View style={s.auth}>
+        <Brand />
+        <View style={s.authHeading}>
           <Text style={s.title}>
-            {register
-              ? 'Seu lugar no VagaLivre.'
-              : 'Bem-vindo ao seu próximo lugar.'}
-          </Text>
-          <Text style={s.subtitle}>
-            Encontre uma garagem ou compartilhe a sua. Tudo com a mesma conta.
-          </Text>
-        </View>
-        <View style={s.card}>
-          <Text style={s.cardTitle}>
             {register ? 'Crie sua conta' : 'Entre na sua conta'}
           </Text>
+          <Text style={s.subtitle}>
+            {register
+              ? 'Encontre uma garagem ou anuncie a sua.'
+              : 'Seu próximo lugar começa aqui.'}
+          </Text>
+        </View>
+        <View style={s.authForm}>
           {register && (
             <Field
               label="Nome completo"
@@ -182,6 +177,7 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
             value={form.email}
             onChangeText={update('email')}
             autoCapitalize="none"
+            autoCorrect={false}
             keyboardType="email-address"
             autoComplete="email"
             maxLength={150}
@@ -211,6 +207,13 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
             value={form.password}
             onChangeText={update('password')}
             secureTextEntry
+            autoComplete={register ? 'new-password' : 'current-password'}
+            onSubmitEditing={() => {
+              if (!busy) {
+                submit();
+              }
+            }}
+            returnKeyType="go"
             maxLength={100}
           />
           <Notice text={error} />
@@ -219,20 +222,26 @@ function Auth({ onLogin }: { onLogin: (user: User) => void }) {
             onPress={submit}
             busy={busy}
           />
-          <Button
-            secondary
-            title={register ? 'Já tenho uma conta' : 'Quero criar uma conta'}
-            busy={busy}
-            onPress={() => {
-              setRegister(!register);
-              setError('');
-            }}
-          />
+          <View>
+            <Text style={s.centeredCaption}>
+              {register
+                ? 'Já faz parte do VagaLivre?'
+                : 'Ainda não tem uma conta?'}
+            </Text>
+            <Button
+              quiet
+              title={register ? 'Já tenho uma conta' : 'Criar conta'}
+              busy={busy}
+              onPress={() => {
+                setRegister(!register);
+                setError('');
+              }}
+            />
+          </View>
         </View>
-        <Connection />
-        <Text style={s.caption}>
-          Uma conta. Dois caminhos: estacionar ou anunciar.
-        </Text>
+        <View style={s.authFooter}>
+          <Connection />
+        </View>
       </View>
     </Page>
   );
@@ -351,151 +360,14 @@ function Home({
   onChange: (user: User) => void;
   onLogout: () => void;
 }) {
-  const [tab, setTab] = useState<'explore' | 'mine' | 'profile'>('explore');
-  const [garages, setGarages] = useState<Garage[]>([]);
-  const [query, setQuery] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [revision, setRevision] = useState(0);
-  useFocusEffect(
-    useCallback(() => {
-      // Incrementar revision solicita novamente a listagem ao tocar em Atualizar.
-      void revision;
-      if (tab === 'profile') {
-        return;
-      }
-      let active = true;
-      setBusy(true);
-      setError('');
-      setGarages([]);
-      api
-        .get<Garage[]>(tab === 'mine' ? '/garages/mine' : '/garages')
-        .then(({ data }) => {
-          if (active) {
-            setGarages(data);
-          }
-        })
-        .catch(e => {
-          if (active) {
-            setError(errorMessage(e));
-          }
-        })
-        .finally(() => {
-          if (active) {
-            setBusy(false);
-          }
-        });
-      return () => {
-        active = false;
-      };
-    }, [tab, revision]),
-  );
-  const filtered = garages.filter(g =>
-    `${g.title} ${g.address}`
-      .toLocaleLowerCase('pt-BR')
-      .includes(query.toLocaleLowerCase('pt-BR')),
-  );
   return (
-    <Page>
-      <Brand />
-      <View style={s.hero}>
-        <Text style={s.badge}>SEU ESPAÇO, SUAS POSSIBILIDADES</Text>
-        <Text style={s.title}>Olá, {user.fullName.split(' ')[0]}.</Text>
-        <Text style={s.subtitle}>
-          Uma garagem disponível pode facilitar o seu dia — ou virar uma
-          oportunidade.
-        </Text>
-        <Button
-          title="+ Anunciar minha garagem"
-          onPress={() => navigation.navigate('Editor', {})}
-        />
-      </View>
-      <View style={s.tabs}>
-        {(
-          [
-            ['explore', 'Encontrar'],
-            ['mine', 'Minhas garagens'],
-            ['profile', 'Meu perfil'],
-          ] as const
-        ).map(([key, label]) => (
-          <Pressable
-            key={key}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: tab === key }}
-            style={[s.tab, tab === key && s.tabActive]}
-            onPress={() => {
-              setTab(key);
-              setQuery('');
-            }}
-          >
-            <Text style={[s.tabText, tab === key && { color: colors.blue }]}>
-              {label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-      {tab === 'profile' ? (
-        <Profile user={user} onChange={onChange} onLogout={onLogout} />
-      ) : (
-        <>
-          <View style={s.row}>
-            <Text style={[s.cardTitle, { flex: 1 }]}>
-              {tab === 'mine' ? 'Seus espaços' : 'Encontre seu próximo lugar'}
-            </Text>
-            <Button
-              secondary
-              title="Atualizar"
-              onPress={() => setRevision(old => old + 1)}
-              busy={busy}
-            />
-          </View>
-          <Field
-            label="Buscar por título ou endereço"
-            placeholder="Onde você quer estacionar?"
-            value={query}
-            onChangeText={setQuery}
-          />
-          <Notice text={error} />
-          {busy && <ActivityIndicator size="large" color={colors.blue} />}
-          {!busy && !error && filtered.length === 0 && (
-            <View style={[s.card, s.empty]}>
-              <Text style={s.cardTitle}>Nenhuma garagem por aqui ainda.</Text>
-              <Text style={s.subtitle}>
-                {query
-                  ? 'Tente outro título ou endereço.'
-                  : tab === 'mine'
-                  ? 'Anuncie seu primeiro espaço para começar.'
-                  : 'Os novos anúncios aparecerão aqui.'}
-              </Text>
-            </View>
-          )}
-          {filtered.map(garage => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Ver ${garage.title}`}
-              key={garage.id}
-              style={s.card}
-              onPress={() => navigation.navigate('Garage', { garage })}
-            >
-              <View style={s.row}>
-                <Text style={s.badge}>
-                  {garage.isActive ? 'Ativa' : 'Desativada'}
-                </Text>
-                <Text style={s.caption}>{vehicles[garage.maxVehicleType]}</Text>
-              </View>
-              <Text style={s.cardTitle}>{garage.title}</Text>
-              <Text style={s.subtitle}>{garage.address}</Text>
-              <Text style={s.caption} numberOfLines={2}>
-                {garage.description}
-              </Text>
-              <Text style={{ color: colors.blue, fontWeight: '700' }}>
-                Ver garagem →
-              </Text>
-            </Pressable>
-          ))}
-        </>
-      )}
-    </Page>
+    <HomeScreen
+      user={user}
+      onGarage={garage => navigation.navigate('Garage', { garage })}
+      onAnnounce={() => navigation.navigate('Editor', {})}
+      profile={<Profile user={user} onChange={onChange} onLogout={onLogout} />}
+      settings={<Connection />}
+    />
   );
 }
 
